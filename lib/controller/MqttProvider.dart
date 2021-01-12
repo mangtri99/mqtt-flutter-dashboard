@@ -25,6 +25,16 @@ class MqttAppState with ChangeNotifier {
     notifyListeners();
   }
 
+  void setReceivedOksigen(String text) {
+    _receivedOksigen = text;
+    notifyListeners();
+  }
+
+  void setReceivedTekanan(String text) {
+    _receivedTekanan = text;
+    notifyListeners();
+  }
+
   void setAppConnectionState(MQTTAppConnectionState state) {
     _appConnectionState = state;
     notifyListeners();
@@ -34,5 +44,7 @@ class MqttAppState with ChangeNotifier {
 
   String get getReceivedTemp => _receivedTemp;
   String get getReceivedBpm => _receivedBpm;
+  String get getReceivedOksigen => _receivedOksigen;
+  String get getReceivedTekanan => _receivedTekanan;
   MQTTAppConnectionState get getAppConnectionState => _appConnectionState;
 }

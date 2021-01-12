@@ -36,11 +36,15 @@ class _SettingState extends State<Setting> {
 
     var _getBroker = preferences.getString('broker');
     var _getTopicMain = preferences.getString('topicMain');
+    var _getTopicSave = preferences.getString('topicSave');
+    var _getTopicSend = preferences.getString('topicSend');
 
     if (_getBroker != null && _getTopicMain != null) {
       setState(() {
         _brokerController.text = _getBroker;
         _topicController.text = _getTopicMain;
+        _topicSaveController.text = _getTopicSave;
+        _topicSendController.text = _getTopicSend;
       });
     }
   }
@@ -57,23 +61,13 @@ class _SettingState extends State<Setting> {
     // TODO: implement dispose
     _brokerController.dispose();
     _topicController.dispose();
+    _topicSaveController.dispose();
+    _topicSendController.dispose();
     super.dispose();
   }
 
-  void configureConnection() {
-    manager = MQTTManager(
-        host: _brokerController.text,
-        topicMain: _topicController.text,
-        appState: appState);
-  }
-
-  void disconnect() {
-    manager.disconnect();
-  }
-
-  void publishMessage(String text) {
-    final String message = text;
-    manager.publish(message);
+  void check() {
+    print('not work');
   }
 
   String _statusConnection(MQTTAppConnectionState state) {
@@ -116,19 +110,37 @@ class _SettingState extends State<Setting> {
               children: [
                 Expanded(
                   child: Container(
-                    color: Colors.deepOrange,
-                    child:
-                        Text(_statusConnection(appState.getAppConnectionState)),
+                    padding: EdgeInsets.symmetric(vertical: 5.0),
+                    color: appState.getAppConnectionState ==
+                            MQTTAppConnectionState.disconnect
+                        ? Colors.deepOrange
+                        : Colors.green,
+                    child: Center(
+                        child: Text(
+                            _statusConnection(appState.getAppConnectionState))),
                   ),
                 )
               ],
+            ),
+            SizedBox(
+              height: 15,
             ),
             _buildTextField(_brokerController, 'Alamat Broker',
                 appState.getAppConnectionState),
             SizedBox(
               height: 10.0,
             ),
-            _buildTextField(_brokerController, 'Topic Wildcard',
+            _buildTextField(_topicController, 'Topic Subscribe (Wildcard)',
+                appState.getAppConnectionState),
+            SizedBox(
+              height: 10.0,
+            ),
+            _buildTextField(_topicSendController, 'Topic Publish (btn Send)',
+                appState.getAppConnectionState),
+            SizedBox(
+              height: 10.0,
+            ),
+            _buildTextField(_topicSaveController, 'Topic Publish (btn Save)',
                 appState.getAppConnectionState),
             SizedBox(
               height: 20.0,
@@ -153,42 +165,6 @@ class _SettingState extends State<Setting> {
                 ),
               ],
             ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Container(
-                  height: 50,
-                  child: FlatButton(
-                    onPressed: appState.getAppConnectionState ==
-                            MQTTAppConnectionState.disconnect
-                        ? configureConnection
-                        : null,
-                    child: Text(
-                      'Connect',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                    color: Colors.blue,
-                    textColor: Colors.blue,
-                  ),
-                ),
-                Container(
-                  height: 50,
-                  child: FlatButton(
-                    onPressed: appState.getAppConnectionState ==
-                            MQTTAppConnectionState.disconnect
-                        ? disconnect
-                        : null,
-                    child: Text(
-                      'Disconnect',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                    color: Colors.blue,
-                    textColor: Colors.blue,
-                  ),
-                )
-              ],
-            )
           ],
         ),
       );
@@ -198,24 +174,25 @@ class _SettingState extends State<Setting> {
   Widget _buildTextField(TextEditingController controller, String hintText,
       MQTTAppConnectionState state) {
     bool enable = false;
-    if (controller == _topicSendController &&
-        state == MQTTAppConnectionState.connected) {
+    if ((controller == _topicSendController &&
+            state == MQTTAppConnectionState.disconnect) ||
+        (controller == _topicSaveController &&
+            state == MQTTAppConnectionState.disconnect)) {
       enable = true;
-    } else if ((controller == _topicController &&
+    } else if ((controller == _brokerController &&
             state == MQTTAppConnectionState.disconnect) ||
         (controller == _topicController &&
             state == MQTTAppConnectionState.disconnect)) {
       enable = true;
-
-      return TextFormField(
-        enabled: enable,
-        controller: _brokerController,
-        decoration: InputDecoration(
-            border: OutlineInputBorder(),
-            labelText: 'Alamat Broker ',
-            contentPadding: EdgeInsets.only(left: 10.0)),
-      );
     }
+    return TextFormField(
+      enabled: enable,
+      controller: controller,
+      decoration: InputDecoration(
+          border: OutlineInputBorder(),
+          labelText: hintText,
+          contentPadding: EdgeInsets.only(left: 10.0)),
+    );
   }
 }
 
@@ -223,3 +200,9 @@ _displaySnackBar(BuildContext context) {
   final snackBar = SnackBar(content: Text('Berhasil Disimpan'));
   Scaffold.of(context).showSnackBar(snackBar);
 }
+
+// _displayStatusConnection(BuildContext context) {
+//   final snackBarStatus =
+//       SnackBar(content: Text('Disconnect untuk mengubah setting'));
+//   Scaffold.of(context).showSnackBar(snackBarStatus);
+// }

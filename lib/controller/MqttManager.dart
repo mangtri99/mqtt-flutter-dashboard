@@ -9,8 +9,11 @@ class MQTTManager {
   MqttServerClient _client;
   final String _host;
   final String _topicMain;
+
   var topicSuhu;
   var topicBpm;
+  var topicSave;
+  var topicSend;
 
   MQTTManager(
       {@required String host,
@@ -43,19 +46,17 @@ class MQTTManager {
 
   //connect to host
 
-  void getTopicSubscribe() async {
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    topicSuhu = preferences.getString('topicSuhu');
-    topicBpm = preferences.getString('topicBpm');
-  }
-
   void connect() async {
     assert(_client != null);
     try {
       print('Mosquito start client connecting...');
       _appState.setAppConnectionState(MQTTAppConnectionState.connecting);
       await _client.connect();
-      getTopicSubscribe();
+      SharedPreferences preferences = await SharedPreferences.getInstance();
+      topicSuhu = preferences.getString('topicSuhu');
+      topicBpm = preferences.getString('topicBpm');
+      topicSave = preferences.getString('topicSave');
+      topicSend = preferences.getString('topicSend');
     } on Exception catch (e) {
       print('Client error, except - $e');
       disconnect();
@@ -67,11 +68,20 @@ class MQTTManager {
     _client.disconnect();
   }
 
-  void publish(String message) {
+  //mqtt-manager.dart
+  void publish(String message, String topic) {
     final MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
     builder.addString(message);
-    _client.publishMessage(_topicMain, MqttQos.exactlyOnce, builder.payload);
+    print(topicSend);
+    _client.publishMessage(topic, MqttQos.exactlyOnce, builder.payload);
+    print('message');
   }
+
+  // void publishSave(String message) {
+  //   final MqttClientPayloadBuilder builder2 = MqttClientPayloadBuilder();
+  //   builder2.addString(message);
+  //   _client.publishMessage('iot12/save', MqttQos.exactlyOnce, builder2.payload);
+  // }
 
   void onSubscribed(String topic) {
     print('Subscribe confirmed from topic $topic');
@@ -95,7 +105,7 @@ class MQTTManager {
       final MqttPublishMessage recMess = c[0].payload;
 
       final String pt =
-          MqttPublishPayload.bytesToString(recMess.payload.message);
+          MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
 
       if (c[0].topic == topicSuhu) {
         _appState.setReceivedTemp(pt);

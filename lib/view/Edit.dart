@@ -4,15 +4,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class Edit extends StatefulWidget {
   final value;
+  final topic;
 
-  Edit({Key key, @required this.value}) : super(key: key);
+  Edit({Key key, @required this.value, @required this.topic}) : super(key: key);
   @override
-  _EditState createState() => _EditState(value: value);
+  _EditState createState() => _EditState(value: value, topic: topic);
 }
 
 class _EditState extends State<Edit> {
-  _EditState({@required this.value}) : super();
-
+  _EditState({@required this.value, @required this.topic}) : super();
+  final topic;
   final value;
   TextEditingController _topicController = TextEditingController();
 
@@ -66,7 +67,7 @@ class _EditState extends State<Edit> {
                 controller: _topicController,
                 decoration: InputDecoration(
                     border: OutlineInputBorder(),
-                    labelText: 'Masukan Topic Suhu',
+                    labelText: 'Topic ' + topic,
                     contentPadding: EdgeInsets.only(left: 10.0)),
               ),
               SizedBox(
