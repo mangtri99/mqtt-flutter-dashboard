@@ -4,36 +4,54 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class Edit extends StatefulWidget {
   final value;
+  final value2;
   final topic;
 
-  Edit({Key key, @required this.value, @required this.topic}) : super(key: key);
+  Edit({
+    Key key,
+    @required this.value,
+    @required this.topic,
+    this.value2,
+  }) : super(key: key);
   @override
   _EditState createState() => _EditState(value: value, topic: topic);
 }
 
 class _EditState extends State<Edit> {
-  _EditState({@required this.value, @required this.topic}) : super();
+  _EditState({
+    @required this.value,
+    @required this.topic,
+    this.value2,
+  }) : super();
   final topic;
   final value;
+  final value2;
+  var isUser;
   TextEditingController _topicController = TextEditingController();
+  TextEditingController _isUserController = TextEditingController();
 
   getData() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     var topic = preferences.getString(widget.value);
+    var topic2 = preferences.getString(widget.value2);
+    isUser = value2;
 
     setState(() {
       _topicController.text = topic;
+      _isUserController.text = topic2;
     });
     // if (value != null) {
     //   setState(() {
     //     _topicController.text = value;
     //   });
     // }
+    print(isUser);
   }
 
   saveData() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     await preferences.setString(widget.value, _topicController.text);
+    await preferences.setString(widget.value2, _isUserController.text);
   }
 
   @override
@@ -42,6 +60,7 @@ class _EditState extends State<Edit> {
     super.initState();
     getData();
     print(widget.value);
+    print(widget.value2);
   }
 
   // @override
@@ -73,6 +92,8 @@ class _EditState extends State<Edit> {
               SizedBox(
                 height: 20.0,
               ),
+              Container(
+                  child: isUser == null ? null : _buildText(_isUserController)),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
@@ -100,6 +121,16 @@ class _EditState extends State<Edit> {
       }),
     );
   }
+}
+
+Widget _buildText(TextEditingController controller) {
+  return TextFormField(
+    controller: controller,
+    decoration: InputDecoration(
+        border: OutlineInputBorder(),
+        labelText: 'Topic User Nama',
+        contentPadding: EdgeInsets.only(left: 10.0)),
+  );
 }
 
 _displaySnackBar(BuildContext context) {

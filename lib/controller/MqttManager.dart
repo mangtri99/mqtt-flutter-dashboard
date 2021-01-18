@@ -3,6 +3,7 @@ import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 import 'package:mqtt_iot/controller/MqttProvider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 
 class MQTTManager {
   final MqttAppState _appState;
@@ -12,8 +13,11 @@ class MQTTManager {
 
   var topicSuhu;
   var topicBpm;
+  var topicOksigen;
+  var topicTekanan;
   var topicSave;
   var topicSend;
+  var topicUser;
 
   MQTTManager(
       {@required String host,
@@ -55,6 +59,9 @@ class MQTTManager {
       SharedPreferences preferences = await SharedPreferences.getInstance();
       topicSuhu = preferences.getString('topicSuhu');
       topicBpm = preferences.getString('topicBpm');
+      topicOksigen = preferences.getString('topicOksigen');
+      topicTekanan = preferences.getString('topicTekanan');
+      topicUser = preferences.getString('topicUser');
       topicSave = preferences.getString('topicSave');
       topicSend = preferences.getString('topicSend');
     } on Exception catch (e) {
@@ -106,11 +113,22 @@ class MQTTManager {
 
       final String pt =
           MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+      DateTime now = DateTime.now();
+      String timestamp = DateFormat('yyyy-MM-dd - kk:mm:ss').format(now);
 
       if (c[0].topic == topicSuhu) {
         _appState.setReceivedTemp(pt);
       } else if (c[0].topic == topicBpm) {
         _appState.setReceivedBpm(pt);
+      } else if (c[0].topic == topicOksigen) {
+        _appState.setReceivedOksigen(pt);
+      } else if (c[0].topic == topicTekanan) {
+        _appState.setReceivedTekanan(pt);
+      } else if (c[0].topic == topicUser) {
+        _appState.setReceivedUser(pt);
+        _appState.setTimestamp(timestamp);
+        _appState.setAppMqttSubscribe(MqttSubscribe.yes);
+        print(pt);
       }
       print(
           'EXAMPLE::Change notification:: topic is <${c[0].topic}>, payload is <-- $pt -->');
