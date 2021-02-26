@@ -80,7 +80,7 @@ class _HomeState extends State<Home> {
 
   void _publishMessageSave() {
     final String message = 'save';
-    manager.publish(message, readTopicSend);
+    manager.publish(message, readTopicSave);
     isSave = true;
     if (isSave) {
       showInSnackBar('Data Tersimpan');
