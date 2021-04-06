@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:mqtt_iot/controller/MqttManager.dart';
 import 'package:mqtt_iot/controller/MqttProvider.dart';
+import 'package:mqtt_iot/model/UserModel.dart';
 
 import 'package:provider/provider.dart';
 //import 'package:mqtt_iot/utils/blood_icon_icons.dart';
@@ -24,6 +25,8 @@ class _HomeState extends State<Home> {
   var readTopicSave = '';
   var readBroker = '';
   var readTopicMain = '';
+
+  //api service
 
   // var userId = '';
   // var userName = '';
@@ -60,6 +63,18 @@ class _HomeState extends State<Home> {
     print('SUHU =>>>>');
   }
 
+  //api service
+  void _getUser() {
+    if (_userController.text == '') {
+      Provider.of<MqttAppState>(context, listen: false)
+          .setMessage('Enter Id User');
+    } else {
+      Provider.of<MqttAppState>(context, listen: false)
+          .fetchUser(_userController.text);
+      _userController.text = '';
+    }
+  }
+
   void configureConnection() {
     manager = MQTTManager(
         host: readBroker, topicMain: readTopicMain, appState: appState);
@@ -72,20 +87,24 @@ class _HomeState extends State<Home> {
   }
 
   //home.dart
-  void _publishMessageSend() {
-    manager.publish(_userController.text, readTopicSend);
-    _userController.clear();
-    print('publish message...');
-  }
+  // void _publishMessageSend() {
+  //   manager.publish(_userController.text, readTopicSend);
+  //   _userController.clear();
+  //   print('publish message...');
+  // }
 
-  void _publishMessageSave() {
-    final String message = 'save';
-    manager.publish(message, readTopicSave);
-    isSave = true;
-    if (isSave) {
-      showInSnackBar('Data Tersimpan');
-      isSave = false;
-    }
+  // void _publishMessageSave() {
+  //   final String message = 'save';
+  //   manager.publish(message, readTopicSave);
+  //   isSave = true;
+  //   if (isSave) {
+  //     showInSnackBar('Data Tersimpan');
+  //     isSave = false;
+  //   }
+  // }
+
+  void _publishData() {
+    Provider.of<MqttAppState>(context, listen: false).postData();
   }
 
   @override
@@ -97,8 +116,11 @@ class _HomeState extends State<Home> {
     var bpm = appState.getReceivedBpm.toString();
     var oksigen = appState.getReceivedOksigen.toString();
     var tekanan = appState.getReceivedTekanan.toString();
-    var userId = appState.getReceivedUserId.toString();
+    // var userId = appState.getReceivedUserId.toString();
+
     var timestamp = appState.getTimestamp.toString();
+    UserModel user =
+        Provider.of<MqttAppState>(context, listen: false).getUser();
 
     return Scaffold(
       key: _scaffoldKey,
@@ -132,7 +154,7 @@ class _HomeState extends State<Home> {
                     MaterialPageRoute(builder: (context) => Setting()));
               })
         ],
-        title: Text('IoT Medical Dashboard'),
+        title: Text('IoT Medical Real Time'),
         backgroundColor: Colors.blue,
       ),
       backgroundColor: Colors.grey[50],
@@ -145,10 +167,13 @@ class _HomeState extends State<Home> {
                 children: [
                   Expanded(
                       child: TextFormField(
+                          onChanged: (value) {
+                            appState.setMessage(null);
+                          },
                           controller: _userController,
                           decoration: InputDecoration(
                               border: OutlineInputBorder(),
-                              labelText: 'No User',
+                              labelText: 'ID Pasien',
                               contentPadding: EdgeInsets.only(left: 8.0)))),
                   Container(
                     margin: EdgeInsets.only(left: 5.0),
@@ -157,12 +182,19 @@ class _HomeState extends State<Home> {
                       onPressed: appState.getAppConnectionState ==
                               MQTTAppConnectionState.connected
                           ? () {
-                              _publishMessageSend();
+                              // _publishMessageSend();
+                              _getUser();
                             }
                           : null,
-                      child: Text(
-                        "Send",
-                        style: TextStyle(fontSize: 17.0),
+                      child: Align(
+                        child: appState.isLoading()
+                            ? CircularProgressIndicator(
+                                backgroundColor: Colors.white,
+                              )
+                            : Text(
+                                "Send",
+                                style: TextStyle(fontSize: 17.0),
+                              ),
                       ),
                       color: Colors.red,
                       textColor: Colors.white,
@@ -185,23 +217,6 @@ class _HomeState extends State<Home> {
                           "User Information",
                           style: TextStyle(fontSize: 15.0),
                         ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => Edit(
-                                          value: 'topicUser',
-                                          value2: 'topicUserName',
-                                          topic: 'User',
-                                        )));
-                          },
-                          child: Container(
-                            height: 20,
-                            width: 20,
-                            child: Icon(Icons.more_vert),
-                          ),
-                        )
                       ],
                     ),
                     decoration: BoxDecoration(
@@ -225,16 +240,14 @@ class _HomeState extends State<Home> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
-                              child: Text(
-                            "No : $userId",
-                            style: TextStyle(fontSize: 16.0),
-                          )),
+                              child: user == null
+                                  ? Text("ID Pasien : ")
+                                  : Text("ID Pasien : " +
+                                      user.noPasien.toString())),
                           Container(
-                            child: Text(
-                              "Nama : ",
-                              style: TextStyle(fontSize: 16.0),
-                            ),
-                          ),
+                              child: user == null
+                                  ? Text("Nama : ")
+                                  : Text("Nama : " + user.name)),
                           Expanded(
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.end,
@@ -297,14 +310,19 @@ class _HomeState extends State<Home> {
                               child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
-                                '$suhu',
-                                style: TextStyle(fontSize: 24),
-                              ),
-                              Text(
-                                '*C',
-                                style: TextStyle(fontSize: 18),
-                              )
+                              appState.getAppConnectionState ==
+                                          MQTTAppConnectionState.connected &&
+                                      appState.getMqttSubscribe ==
+                                          MqttSubscribe.yes &&
+                                      appState.getUserFromApi == UserFromApi.yes
+                                  ? Text(
+                                      '$suhu \u2103',
+                                      style: TextStyle(fontSize: 24),
+                                    )
+                                  : Text(
+                                      '\u2103',
+                                      style: TextStyle(fontSize: 18),
+                                    )
                             ],
                           )),
                           Expanded(
@@ -363,14 +381,17 @@ class _HomeState extends State<Home> {
                               child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
-                                '$bpm ',
-                                style: TextStyle(fontSize: 24),
-                              ),
-                              Text(
-                                'bpm',
-                                style: TextStyle(fontSize: 18),
-                              )
+                              appState.getAppConnectionState ==
+                                          MQTTAppConnectionState.connected &&
+                                      appState.getUserFromApi == UserFromApi.yes
+                                  ? Text(
+                                      '$bpm bpm',
+                                      style: TextStyle(fontSize: 24),
+                                    )
+                                  : Text(
+                                      'bpm',
+                                      style: TextStyle(fontSize: 18),
+                                    )
                             ],
                           )),
                           Expanded(
@@ -429,14 +450,17 @@ class _HomeState extends State<Home> {
                               child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
-                                '$oksigen ',
-                                style: TextStyle(fontSize: 24),
-                              ),
-                              Text(
-                                '%',
-                                style: TextStyle(fontSize: 18),
-                              )
+                              appState.getAppConnectionState ==
+                                          MQTTAppConnectionState.connected &&
+                                      appState.getUserFromApi == UserFromApi.yes
+                                  ? Text(
+                                      '$oksigen %',
+                                      style: TextStyle(fontSize: 24),
+                                    )
+                                  : Text(
+                                      '%',
+                                      style: TextStyle(fontSize: 18),
+                                    )
                             ],
                           )),
                           Expanded(
@@ -495,14 +519,17 @@ class _HomeState extends State<Home> {
                               child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
-                                '$tekanan ',
-                                style: TextStyle(fontSize: 22),
-                              ),
-                              Text(
-                                'mmHg',
-                                style: TextStyle(fontSize: 15),
-                              )
+                              appState.getAppConnectionState ==
+                                          MQTTAppConnectionState.connected &&
+                                      appState.getUserFromApi == UserFromApi.yes
+                                  ? Text(
+                                      '$tekanan mmhg',
+                                      style: TextStyle(fontSize: 22),
+                                    )
+                                  : Text(
+                                      'mmHg',
+                                      style: TextStyle(fontSize: 15),
+                                    )
                             ],
                           )),
                           Expanded(
@@ -537,17 +564,26 @@ class _HomeState extends State<Home> {
           elevation: 10,
           onPressed: appState.getAppConnectionState ==
                       MQTTAppConnectionState.connected &&
-                  appState.getMqttSubscribe == MqttSubscribe.yes
-              ? _publishMessageSave
+                  appState.getMqttSubscribe == MqttSubscribe.yes &&
+                  appState.getUserFromApi == UserFromApi.yes
+              ? () {
+                  // _publishMessageSend();
+                  _publishData();
+                }
               : null,
-          label: Text("Save"),
-          icon: Icon(Icons.send),
+          label: appState.isLoadingSave()
+              ? CircularProgressIndicator(
+                  backgroundColor: Colors.white,
+                )
+              : Text("Simpan"),
+          icon: Icon(Icons.cloud_upload),
           focusColor: Colors.white,
           backgroundColor: appState.getAppConnectionState ==
-                      MQTTAppConnectionState.disconnect ||
-                  appState.getMqttSubscribe == MqttSubscribe.no
-              ? Colors.grey
-              : Colors.blue),
+                      MQTTAppConnectionState.connected &&
+                  appState.getMqttSubscribe == MqttSubscribe.yes &&
+                  appState.getUserFromApi == UserFromApi.yes
+              ? Colors.blue
+              : Colors.grey),
     );
   }
 }

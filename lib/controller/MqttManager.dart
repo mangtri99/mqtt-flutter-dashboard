@@ -61,9 +61,6 @@ class MQTTManager {
       topicBpm = preferences.getString('topicBpm');
       topicOksigen = preferences.getString('topicOksigen');
       topicTekanan = preferences.getString('topicTekanan');
-      topicUser = preferences.getString('topicUser');
-      topicSave = preferences.getString('topicSave');
-      topicSend = preferences.getString('topicSend');
     } on Exception catch (e) {
       print('Client error, except - $e');
       disconnect();
@@ -118,17 +115,16 @@ class MQTTManager {
 
       if (c[0].topic == topicSuhu) {
         _appState.setReceivedTemp(pt);
+        _appState.setAppMqttSubscribe(MqttSubscribe.yes);
       } else if (c[0].topic == topicBpm) {
         _appState.setReceivedBpm(pt);
+        _appState.setAppMqttSubscribe(MqttSubscribe.yes);
       } else if (c[0].topic == topicOksigen) {
         _appState.setReceivedOksigen(pt);
+        _appState.setAppMqttSubscribe(MqttSubscribe.yes);
       } else if (c[0].topic == topicTekanan) {
         _appState.setReceivedTekanan(pt);
-      } else if (c[0].topic == topicUser) {
-        _appState.setReceivedUser(pt);
-        _appState.setTimestamp(timestamp);
         _appState.setAppMqttSubscribe(MqttSubscribe.yes);
-        print(pt);
       }
       print(
           'EXAMPLE::Change notification:: topic is <${c[0].topic}>, payload is <-- $pt -->');

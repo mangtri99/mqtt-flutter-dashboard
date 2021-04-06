@@ -12,8 +12,8 @@ class Setting extends StatefulWidget {
 class _SettingState extends State<Setting> {
   TextEditingController _brokerController = TextEditingController();
   TextEditingController _topicController = TextEditingController();
-  TextEditingController _topicSendController = TextEditingController();
-  TextEditingController _topicSaveController = TextEditingController();
+  // TextEditingController _topicSendController = TextEditingController();
+  // TextEditingController _topicSaveController = TextEditingController();
 
   MqttAppState appState;
   MQTTManager manager;
@@ -27,8 +27,8 @@ class _SettingState extends State<Setting> {
     await preferences.setString('broker', _broker);
     await preferences.setString('topicMain', _topicMain);
 
-    await preferences.setString('topicSave', _topicSaveController.text);
-    await preferences.setString('topicSend', _topicSendController.text);
+    // await preferences.setString('topicSave', _topicSaveController.text);
+    // await preferences.setString('topicSend', _topicSendController.text);
   }
 
   getSetting() async {
@@ -36,15 +36,15 @@ class _SettingState extends State<Setting> {
 
     var _getBroker = preferences.getString('broker');
     var _getTopicMain = preferences.getString('topicMain');
-    var _getTopicSave = preferences.getString('topicSave');
-    var _getTopicSend = preferences.getString('topicSend');
+    // var _getTopicSave = preferences.getString('topicSave');
+    // var _getTopicSend = preferences.getString('topicSend');
 
     if (_getBroker != null && _getTopicMain != null) {
       setState(() {
         _brokerController.text = _getBroker;
         _topicController.text = _getTopicMain;
-        _topicSaveController.text = _getTopicSave;
-        _topicSendController.text = _getTopicSend;
+        // _topicSaveController.text = _getTopicSave;
+        // _topicSendController.text = _getTopicSend;
       });
     }
   }
@@ -61,8 +61,8 @@ class _SettingState extends State<Setting> {
     // TODO: implement dispose
     _brokerController.dispose();
     _topicController.dispose();
-    _topicSaveController.dispose();
-    _topicSendController.dispose();
+    // _topicSaveController.dispose();
+    // _topicSendController.dispose();
     super.dispose();
   }
 
@@ -135,16 +135,16 @@ class _SettingState extends State<Setting> {
             SizedBox(
               height: 10.0,
             ),
-            _buildTextField(_topicSendController, 'Topic Publish (btn Send)',
-                appState.getAppConnectionState),
-            SizedBox(
-              height: 10.0,
-            ),
-            _buildTextField(_topicSaveController, 'Topic Publish (btn Save)',
-                appState.getAppConnectionState),
-            SizedBox(
-              height: 20.0,
-            ),
+            // _buildTextField(_topicSendController, 'Topic Publish (btn Send)',
+            //     appState.getAppConnectionState),
+            // SizedBox(
+            //   height: 10.0,
+            // ),
+            // _buildTextField(_topicSaveController, 'Topic Publish (btn Save)',
+            //     appState.getAppConnectionState),
+            // SizedBox(
+            //   height: 20.0,
+            // ),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -174,12 +174,7 @@ class _SettingState extends State<Setting> {
   Widget _buildTextField(TextEditingController controller, String hintText,
       MQTTAppConnectionState state) {
     bool enable = false;
-    if ((controller == _topicSendController &&
-            state == MQTTAppConnectionState.disconnect) ||
-        (controller == _topicSaveController &&
-            state == MQTTAppConnectionState.disconnect)) {
-      enable = true;
-    } else if ((controller == _brokerController &&
+    if ((controller == _brokerController &&
             state == MQTTAppConnectionState.disconnect) ||
         (controller == _topicController &&
             state == MQTTAppConnectionState.disconnect)) {
