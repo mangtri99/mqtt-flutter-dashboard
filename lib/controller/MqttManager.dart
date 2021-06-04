@@ -14,10 +14,8 @@ class MQTTManager {
   var topicSuhu;
   var topicBpm;
   var topicOksigen;
-  var topicTekanan;
-  var topicSave;
-  var topicSend;
-  var topicUser;
+  var topicTekananSistole;
+  var topicTekananDiastole;
 
   MQTTManager(
       {@required String host,
@@ -60,7 +58,8 @@ class MQTTManager {
       topicSuhu = preferences.getString('topicSuhu');
       topicBpm = preferences.getString('topicBpm');
       topicOksigen = preferences.getString('topicOksigen');
-      topicTekanan = preferences.getString('topicTekanan');
+      topicTekananSistole = preferences.getString('topicTekananSistole');
+      topicTekananDiastole = preferences.getString('topicTekananDiastole');
     } on Exception catch (e) {
       print('Client error, except - $e');
       disconnect();
@@ -76,16 +75,9 @@ class MQTTManager {
   void publish(String message, String topic) {
     final MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
     builder.addString(message);
-    print(topicSend);
     _client.publishMessage(topic, MqttQos.exactlyOnce, builder.payload);
     print('message');
   }
-
-  // void publishSave(String message) {
-  //   final MqttClientPayloadBuilder builder2 = MqttClientPayloadBuilder();
-  //   builder2.addString(message);
-  //   _client.publishMessage('iot12/save', MqttQos.exactlyOnce, builder2.payload);
-  // }
 
   void onSubscribed(String topic) {
     print('Subscribe confirmed from topic $topic');
@@ -122,8 +114,11 @@ class MQTTManager {
       } else if (c[0].topic == topicOksigen) {
         _appState.setReceivedOksigen(pt);
         _appState.setAppMqttSubscribe(MqttSubscribe.yes);
-      } else if (c[0].topic == topicTekanan) {
-        _appState.setReceivedTekanan(pt);
+      } else if (c[0].topic == topicTekananSistole) {
+        _appState.setReceivedTekananSistole(pt);
+        _appState.setAppMqttSubscribe(MqttSubscribe.yes);
+      } else if (c[0].topic == topicTekananDiastole) {
+        _appState.setReceivedTekananDiastole(pt);
         _appState.setAppMqttSubscribe(MqttSubscribe.yes);
       }
       print(

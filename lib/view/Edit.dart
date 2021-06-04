@@ -14,7 +14,8 @@ class Edit extends StatefulWidget {
     this.value2,
   }) : super(key: key);
   @override
-  _EditState createState() => _EditState(value: value, topic: topic);
+  _EditState createState() =>
+      _EditState(value: value, topic: topic, value2: value2);
 }
 
 class _EditState extends State<Edit> {
@@ -40,11 +41,7 @@ class _EditState extends State<Edit> {
       _topicController.text = topic;
       _isUserController.text = topic2;
     });
-    // if (value != null) {
-    //   setState(() {
-    //     _topicController.text = value;
-    //   });
-    // }
+
     print(isUser);
   }
 
@@ -52,23 +49,16 @@ class _EditState extends State<Edit> {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     await preferences.setString(widget.value, _topicController.text);
     await preferences.setString(widget.value2, _isUserController.text);
+    _topicController.dispose();
   }
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getData();
     print(widget.value);
     print(widget.value2);
   }
-
-  // @override
-  // void dispose() {
-  //   // TODO: implement dispose
-  //   super.dispose();
-  //   _topicController.dispose();
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -124,12 +114,19 @@ class _EditState extends State<Edit> {
 }
 
 Widget _buildText(TextEditingController controller) {
-  return TextFormField(
-    controller: controller,
-    decoration: InputDecoration(
-        border: OutlineInputBorder(),
-        labelText: 'Topic User Nama',
-        contentPadding: EdgeInsets.only(left: 10.0)),
+  return Column(
+    children: [
+      TextFormField(
+        controller: controller,
+        decoration: InputDecoration(
+            border: OutlineInputBorder(),
+            labelText: 'Topic Tekanan Darah (Diastole)',
+            contentPadding: EdgeInsets.only(left: 10.0)),
+      ),
+      SizedBox(
+        height: 20.0,
+      )
+    ],
   );
 }
 

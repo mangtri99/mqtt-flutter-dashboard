@@ -1,11 +1,13 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import 'package:mqtt_iot/controller/MqttManager.dart';
 import 'package:mqtt_iot/controller/MqttProvider.dart';
+
 import 'package:mqtt_iot/model/UserModel.dart';
 
 import 'package:provider/provider.dart';
-//import 'package:mqtt_iot/utils/blood_icon_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'Setting.dart';
 import 'Edit.dart';
@@ -15,21 +17,42 @@ class Home extends StatefulWidget {
   _HomeState createState() => _HomeState();
 }
 
+class LifecycleEventHandler extends WidgetsBindingObserver {
+  final AsyncCallback resumeCallBack;
+  final AsyncCallback suspendingCallBack;
+
+  LifecycleEventHandler({
+    this.resumeCallBack,
+    this.suspendingCallBack,
+  });
+
+  @override
+  Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        if (resumeCallBack != null) {
+          await resumeCallBack();
+        }
+        break;
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.paused:
+      case AppLifecycleState.detached:
+        if (suspendingCallBack != null) {
+          await suspendingCallBack();
+        }
+        break;
+    }
+  }
+}
+
 class _HomeState extends State<Home> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   final TextEditingController _userController = TextEditingController();
   MqttAppState appState;
   MQTTManager manager;
 
-  var readTopicSend = '';
-  var readTopicSave = '';
   var readBroker = '';
   var readTopicMain = '';
-
-  //api service
-
-  // var userId = '';
-  // var userName = '';
 
   bool isSave = false;
 
@@ -41,15 +64,10 @@ class _HomeState extends State<Home> {
   getSavedTopic() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
 
-    var getTopicSend = preferences.getString('topicSend');
-    var getTopicSave = preferences.getString('topicSave');
-
     var getBroker = preferences.getString('broker');
     var getTopicMain = preferences.getString('topicMain');
 
     setState(() {
-      readTopicSend = getTopicSend;
-      readTopicSave = getTopicSave;
       readBroker = getBroker;
       readTopicMain = getTopicMain;
     });
@@ -59,12 +77,17 @@ class _HomeState extends State<Home> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    WidgetsBinding.instance.addObserver(LifecycleEventHandler(
+        resumeCallBack: () async => setState(() {
+              // do something
+            })));
     getSavedTopic();
-    print('SUHU =>>>>');
   }
 
   //api service
   void _getUser() {
+    DateTime now = DateTime.now();
+    String timestamp = DateFormat('yyyy-MM-dd - kk:mm:ss').format(now);
     if (_userController.text == '') {
       Provider.of<MqttAppState>(context, listen: false)
           .setMessage('Enter Id User');
@@ -72,6 +95,7 @@ class _HomeState extends State<Home> {
       Provider.of<MqttAppState>(context, listen: false)
           .fetchUser(_userController.text);
       _userController.text = '';
+      Provider.of<MqttAppState>(context, listen: false).setTimestamp(timestamp);
     }
   }
 
@@ -86,26 +110,33 @@ class _HomeState extends State<Home> {
     manager.disconnect();
   }
 
-  //home.dart
-  // void _publishMessageSend() {
-  //   manager.publish(_userController.text, readTopicSend);
-  //   _userController.clear();
-  //   print('publish message...');
-  // }
-
-  // void _publishMessageSave() {
-  //   final String message = 'save';
-  //   manager.publish(message, readTopicSave);
-  //   isSave = true;
-  //   if (isSave) {
-  //     showInSnackBar('Data Tersimpan');
-  //     isSave = false;
-  //   }
-  // }
-
   void _publishData() {
     Provider.of<MqttAppState>(context, listen: false).postData();
   }
+
+  @override
+  void dispose() {
+    // remove the observer
+    WidgetsBinding.instance.addObserver(LifecycleEventHandler(
+        resumeCallBack: () async => setState(() {
+              // do something
+            })));
+    _userController.dispose();
+    super.dispose();
+  }
+
+  // AppLifecycleState _notification;
+
+  // @override
+  // void didChangeAppLifecycleState(AppLifecycleState state) {
+  //   // super.didChangeAppLifecycleState(state);
+  //   setState(() {
+  //     _notification = state;
+  //     getSavedTopic();
+  //     print(_notification);
+  //   });
+  //   // These are the callbacks
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -115,8 +146,8 @@ class _HomeState extends State<Home> {
     var suhu = appState.getReceivedTemp.toString();
     var bpm = appState.getReceivedBpm.toString();
     var oksigen = appState.getReceivedOksigen.toString();
-    var tekanan = appState.getReceivedTekanan.toString();
-    // var userId = appState.getReceivedUserId.toString();
+    var tekananSistole = appState.getReceivedTekananSistole.toString();
+    var tekananDiastole = appState.getReceivedTekananDiastole.toString();
 
     var timestamp = appState.getTimestamp.toString();
     UserModel user =
@@ -504,8 +535,9 @@ class _HomeState extends State<Home> {
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) => Edit(
-                                                value: 'topicTekanan',
-                                                topic: 'Tekanan Darah',
+                                                value: 'topicTekananSistole',
+                                                topic: 'Tekanan Darah Sistole',
+                                                value2: 'topicTekananDiastole',
                                               )));
                                 },
                                 child: Container(
@@ -523,7 +555,7 @@ class _HomeState extends State<Home> {
                                           MQTTAppConnectionState.connected &&
                                       appState.getUserFromApi == UserFromApi.yes
                                   ? Text(
-                                      '$tekanan mmhg',
+                                      '$tekananSistole / $tekananDiastole mmhg',
                                       style: TextStyle(fontSize: 22),
                                     )
                                   : Text(

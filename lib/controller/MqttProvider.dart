@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:mqtt_iot/model/UserModel.dart';
 import 'package:mqtt_iot/service/api.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 enum MQTTAppConnectionState { connected, disconnect, connecting }
 enum MqttSubscribe { yes, no }
@@ -20,9 +21,9 @@ class MqttAppState with ChangeNotifier {
   String _receivedTemp = '';
   String _receivedOksigen = '';
   String _receivedBpm = '';
-  String _receivedTekanan = '';
+  String _receivedTekananSistole = '';
+  String _receivedTekananDiastole = '';
   String _receivedId = '';
-  String _receivedName = '';
   String _timestamp = '';
 
   //api service
@@ -40,9 +41,6 @@ class MqttAppState with ChangeNotifier {
         setUserFromApi(UserFromApi.yes);
         print(data.body);
       } else {
-        // Map<String, dynamic> result = json.decode(data.body);
-        // setMessage(result['message']);
-        // print(data.body);
         Fluttertoast.showToast(
             msg: "Data Not Found",
             toastLength: Toast.LENGTH_SHORT,
@@ -57,8 +55,10 @@ class MqttAppState with ChangeNotifier {
   }
 
   Future<http.Response> postData() async {
-    setLoading(true);
-    final response = await http.post('http://35ad9c5c08e2.ngrok.io/api/user/',
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    var _apiUrl = preferences.getString('apiUrl');
+    setLoadingSave(true);
+    final response = await http.post(_apiUrl + '/',
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8'
         },
@@ -124,10 +124,6 @@ class MqttAppState with ChangeNotifier {
     notifyListeners();
   }
 
-  // String getMessage() {
-  //   return errorMessage;
-  // }
-
   bool isUser() {
     return user != null ? true : false;
   }
@@ -149,14 +145,18 @@ class MqttAppState with ChangeNotifier {
     notifyListeners();
   }
 
-  void setReceivedTekanan(String text) {
-    _receivedTekanan = text;
+  void setReceivedTekananSistole(String text) {
+    _receivedTekananSistole = text;
+    notifyListeners();
+  }
+
+  void setReceivedTekananDiastole(String text) {
+    _receivedTekananDiastole = text;
     notifyListeners();
   }
 
   void setReceivedUser(String id) {
     _receivedId = id;
-    // _receivedName = name;
     notifyListeners();
   }
 
@@ -185,7 +185,8 @@ class MqttAppState with ChangeNotifier {
   String get getReceivedTemp => _receivedTemp;
   String get getReceivedBpm => _receivedBpm;
   String get getReceivedOksigen => _receivedOksigen;
-  String get getReceivedTekanan => _receivedTekanan;
+  String get getReceivedTekananSistole => _receivedTekananSistole;
+  String get getReceivedTekananDiastole => _receivedTekananDiastole;
   String get getReceivedUserId => _receivedId;
   String get getTimestamp => _timestamp;
   MQTTAppConnectionState get getAppConnectionState => _appConnectionState;
