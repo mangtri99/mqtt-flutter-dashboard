@@ -27,10 +27,6 @@ class _SettingState extends State<Setting> {
     await preferences.setString('broker', _brokerController.text);
     await preferences.setString('topicMain', _topicController.text);
     await preferences.setString('apiUrl', _apiController.text);
-
-    _brokerController.dispose();
-    // _topicController.dispose();
-    // _apiController.dispose();
   }
 
   getSetting() async {
@@ -55,10 +51,13 @@ class _SettingState extends State<Setting> {
     getSetting();
   }
 
-  // @override
-  // void dispose() {
-  //   super.dispose();
-  // }
+  @override
+  void dispose() {
+    _brokerController.dispose();
+    _topicController.dispose();
+    _apiController.dispose();
+    super.dispose();
+  }
 
   void check() {
     print('not work');

@@ -304,17 +304,25 @@ class _HomeState extends State<Home> {
                   mainAxisSpacing: 10,
                   children: [
                     Container(
-                      padding: EdgeInsets.only(left: 5.0, bottom: 5.0),
+                      padding: EdgeInsets.all(6.0),
                       decoration: BoxDecoration(
-                          border: Border.all(color: Colors.red),
-                          color: Colors.white),
+                          borderRadius: BorderRadius.circular(10.0),
+                          border: Border.all(color: Colors.red[300]),
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 3,
+                                blurRadius: 2,
+                                offset: Offset(0, 3))
+                          ]),
                       child: Column(
                         children: [
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Container(
-                                margin: EdgeInsets.only(top: 5.0),
+                                margin: EdgeInsets.only(top: 5.0, left: 2.0),
                                 child: Icon(
                                   Icons.device_thermostat,
                                   color: Colors.red,
@@ -365,7 +373,10 @@ class _HomeState extends State<Home> {
                                 children: [
                                   Text(
                                     "Suhu Tubuh",
-                                    style: TextStyle(fontSize: 12.0),
+                                    style: TextStyle(
+                                      fontSize: 12.0,
+                                      fontWeight: FontWeight.normal,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -375,17 +386,25 @@ class _HomeState extends State<Home> {
                       ),
                     ),
                     Container(
-                      padding: EdgeInsets.only(left: 5.0, bottom: 5.0),
+                      padding: EdgeInsets.all(6.0),
                       decoration: BoxDecoration(
-                          border: Border.all(color: Colors.red),
-                          color: Colors.white),
+                          borderRadius: BorderRadius.circular(10.0),
+                          border: Border.all(color: Colors.red[300]),
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 3,
+                                blurRadius: 2,
+                                offset: Offset(0, 3))
+                          ]),
                       child: Column(
                         children: [
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Container(
-                                margin: EdgeInsets.only(top: 5.0),
+                                margin: EdgeInsets.only(top: 5.0, left: 2.0),
                                 child: Icon(
                                   Icons.favorite,
                                   color: Colors.red,
@@ -444,9 +463,17 @@ class _HomeState extends State<Home> {
                       ),
                     ),
                     Container(
-                      padding: EdgeInsets.only(left: 5.0, bottom: 5.0),
+                      padding: EdgeInsets.all(6.0),
                       decoration: BoxDecoration(
-                          border: Border.all(color: Colors.red),
+                          boxShadow: [
+                            BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 3,
+                                blurRadius: 2,
+                                offset: Offset(0, 3))
+                          ],
+                          borderRadius: BorderRadius.circular(10.0),
+                          border: Border.all(color: Colors.red[300]),
                           color: Colors.white),
                       child: Column(
                         children: [
@@ -454,7 +481,7 @@ class _HomeState extends State<Home> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Container(
-                                margin: EdgeInsets.only(top: 5.0),
+                                margin: EdgeInsets.only(top: 5.0, left: 2.0),
                                 child: Icon(
                                   Icons.album,
                                   color: Colors.red,
@@ -513,9 +540,17 @@ class _HomeState extends State<Home> {
                       ),
                     ),
                     Container(
-                      padding: EdgeInsets.only(left: 5.0, bottom: 5.0),
+                      padding: EdgeInsets.all(6.0),
                       decoration: BoxDecoration(
-                          border: Border.all(color: Colors.red),
+                          boxShadow: [
+                            BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 3,
+                                blurRadius: 2,
+                                offset: Offset(0, 3))
+                          ],
+                          borderRadius: BorderRadius.circular(10.0),
+                          border: Border.all(color: Colors.red[300]),
                           color: Colors.white),
                       child: Column(
                         children: [
@@ -523,7 +558,7 @@ class _HomeState extends State<Home> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Container(
-                                margin: EdgeInsets.only(top: 5.0),
+                                margin: EdgeInsets.only(top: 5.0, left: 2.0),
                                 child: Icon(
                                   Icons.healing,
                                   color: Colors.red,
